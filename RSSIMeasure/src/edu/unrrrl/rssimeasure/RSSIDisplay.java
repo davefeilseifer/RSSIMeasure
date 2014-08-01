@@ -1,5 +1,10 @@
 package edu.unrrrl.rssimeasure;
 
+import java.util.Date;
+
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -9,9 +14,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
-
 public class RSSIDisplay extends Activity {
-
+	private static String IP = "192.168.1.126";
+	private static String url_create_measurement = "http://" + IP + "/rssi/create_measurement.php";
+	
+    HttpClient httpclient = new DefaultHttpClient();
+	
 	WifiManager wifiManager;
 	Handler mHandler = new Handler();
 
@@ -25,7 +33,7 @@ public class RSSIDisplay extends Activity {
 	            // TODO Auto-generated method stub
 	            while (true) {
 	                try {
-	                    Thread.sleep(1000);
+	                    Thread.sleep(500);
 	                    mHandler.post(new Runnable() {
 
 	                        @Override
@@ -45,7 +53,7 @@ public class RSSIDisplay extends Activity {
 	}
 
 	
-	private void checkWifi(){
+	private void checkWifi() {
 	    ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 	    NetworkInfo Info = cm.getActiveNetworkInfo();
 	    if (Info == null || !Info.isConnectedOrConnecting()) {
@@ -59,8 +67,10 @@ public class RSSIDisplay extends Activity {
 	            int linkSpeed = wifiManager.getConnectionInfo().getLinkSpeed();
 	            int rssi = wifiManager.getConnectionInfo().getRssi();
 	            Log.i("WIFI CONNECTION", "Wifi connection speed: "+linkSpeed + " rssi: "+rssi);
-
-
+	            Date d =new Date();
+	            int time = d.getMinutes()*60+d.getSeconds();
+	            String params = url_create_measurement + "?rssi=" + rssi + "&time=" + time;
+	            new MeasureTask().execute(params);
 	        //Need to get wifi strength
 	        } 
 	    }
